@@ -1,0 +1,31 @@
+# =====================================================================
+# docker-compose.yml -- xApp-Guard reproducible evaluation
+# ---------------------------------------------------------------------
+# Brings up the full evaluation in one container. The radio is the
+# OpenAirInterface software channel model (no SDR hardware); the
+# Near-RT RIC, SMO and xApp-Guard run as software components in this
+# same image. Reproduce everything with:
+#
+#     docker compose up --build
+#
+# Results (CSVs, JSON summaries and PDF figures) appear under ./results
+# on the host because that directory is bind-mounted into the
+# container.
+# =====================================================================
+services:
+  xapp-guard:
+    build: .
+    image: xapp-guard:latest
+    container_name: xapp-guard-eval
+    volumes:
+      # measured results are written straight back to the host
+      - ./results:/app/results
+    # the evaluation is CPU-only; cap it so it behaves predictably
+    # on a laptop. Adjust to taste.
+    deploy:
+      resources:
+        limits:
+          cpus: "4.0"
+          memory: 4G
+    # run the full pipeline then exit
+    command: ["./run_all.sh"]
